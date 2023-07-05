@@ -95,15 +95,12 @@ class ADS1232:
         # self.__single_clock()
 
         signed_data = 0
-        print(data_in & 0x800000)
         # 0b1000 0000 0000 0000 0000 0000 check if the sign bit is 1. Negative number.
         if (data_in & 0x800000):
             # convert from 2's complement to int
             signed_data = -((data_in ^ 0xffffff) + 1)
-            print("NEG")
         else:  # else do not do anything the value is positive number
             signed_data = data_in
-            print("POS")
 
         logging.debug('Converted 2\'s complement value: ' + str(signed_data))
 
