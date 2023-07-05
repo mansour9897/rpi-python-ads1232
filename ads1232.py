@@ -54,7 +54,7 @@ class ADS1232:
 
     def ReadVoltage(self, channel):
         raw = self.ReadRawValue(channel)
-        return raw * 2.9802325940409414817025043609744e-7
+        return raw * 2.9802325940409414817025043609744e-7 / self.__gain
 
     def ReadRawValue(self, channel):
         if (isinstance(channel, int)):
@@ -130,3 +130,14 @@ class ADS1232:
         elif (gain == 128):
             GPIO.output(self.__pinGain0, True)
             GPIO.output(self.__pinGain1, True)
+            
+    def SetSpeed(self,speed):
+        if (isinstance(speed, int)):
+            if(speed==10):
+                GPIO.output(self.__pinSpeed, False)
+            elif(speed==80):
+                GPIO.output(self.__pinSpeed, True)
+            else:
+                raise TypeError('Speed value must be 10 or 80')      
+        else:
+            raise TypeError('Speed must be integer')  
