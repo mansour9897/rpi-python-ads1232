@@ -1,3 +1,4 @@
+from time import sleep
 from ads1232 import ADS1232
 
 
@@ -34,7 +35,7 @@ class RTD:
     def ReadTemperature(self):
         ch0 = self.__ads1232.ReadVoltage(0)
         ch1 = self.__ads1232.ReadVoltage(1)
-        print("ch0="+str(ch0)+"\tch1="+str(ch1)+"\n")
+        # ("ch0="+str(ch0)+"\tch1="+str(ch1)+"\n")
         v = ch0 - ch1 * 2
         resistor = v / self.__Iref
         return self.__CalculateTemperature(resistor)

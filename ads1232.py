@@ -39,7 +39,9 @@ class ADS1232:
 
     def __single_clock(self):
         GPIO.output(self.__pinSck, True)
+        sleep(0.001)
         GPIO.output(self.__pinSck, False)
+        sleep(0.001)
 
     def _ready(self):
         _is_ready = GPIO.input(self.__pinData) == 0
@@ -54,6 +56,7 @@ class ADS1232:
 
     def ReadVoltage(self, channel):
         raw = self.ReadRawValue(channel)
+        logging.debug('RAW is '+str(raw)+'\r')
         return raw * 2.9802325940409414817025043609744e-7 / self.__gain
 
     def ReadRawValue(self, channel):
@@ -71,28 +74,31 @@ class ADS1232:
         else:
             raise TypeError('Channel must be integer\n')
 
-    def _WaitUntilDataReadyAndReadRaw(self, max_tries=40):
+    def _WaitUntilDataReadyAndReadRaw(self, max_tries=100):
         ready_counter = 0
-        self.__single_clock()
+        # self.__single_clock()
+
+        GPIO.output(self.__pinSck, False)
+
         # loop until ADS1232 is ready
         while self._ready() is False:
             sleep(0.01)
             ready_counter += 1
             if ready_counter >= max_tries:
-                logging.debug('self._read() not ready after 40 trials\n')
+                logging.debug('self._read() not ready after 100 trials\n')
                 return False
 
         return self._ReadSignedData()
 
     def _ReadSignedData(self):
         data_in = 0
-
         # read first 24 bits of data
         for i in range(24):
             self.__single_clock()
             data_in = (data_in << 1) | GPIO.input(self.__pinData)
-
+        
         # self.__single_clock()
+        GPIO.output(self.__pinSck, True)
 
         signed_data = 0
         # 0b1000 0000 0000 0000 0000 0000 check if the sign bit is 1. Negative number.
@@ -108,8 +114,8 @@ class ADS1232:
 
     def SetGain(self, gain):
         if (isinstance(gain, int)):
-            if(gain in [1,2,64,128]):
-                self.__gain=gain
+            if (gain in [1, 2, 64, 128]):
+                self.__gain = gain
                 self.__configGain(gain)
         else:
             raise TypeError('Gian must be integer')
@@ -127,14 +133,14 @@ class ADS1232:
         elif (gain == 128):
             GPIO.output(self.__pinGain0, True)
             GPIO.output(self.__pinGain1, True)
-            
-    def SetSpeed(self,speed):
+
+    def SetSpeed(self, speed):
         if (isinstance(speed, int)):
-            if(speed==10):
+            if (speed == 10):
                 GPIO.output(self.__pinSpeed, False)
-            elif(speed==80):
+            elif (speed == 80):
                 GPIO.output(self.__pinSpeed, True)
             else:
-                raise TypeError('Speed value must be 10 or 80')      
+                raise TypeError('Speed value must be 10 or 80')
         else:
-            raise TypeError('Speed must be integer')  
+            raise TypeError('Speed must be integer')
